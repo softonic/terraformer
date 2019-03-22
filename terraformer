@@ -12,30 +12,32 @@ function usage() {
 }
 
 function cleanup() {
-    for f in $(cat "${tmp}"); do
-        rm $f
-    done
-    rm "${tmp}"
+    if [ -f "$tmp" ]; then
+        for f in $(cat "${tmp}"); do
+            rm $f
+        done
+        rm "${tmp}"
+    fi
 }
 
 tmp=$(mktemp)
-trap "quit 1" SIGINT SIGTERM
+trap "quit 1" SIGINT SIGTERM EXIT
 
 if [ $# -lt 3 ]; then
     usage
     quit 1
 fi
 
-while getopts "f:" opt; do
+while getopts "f:s:" opt; do
   case ${opt} in
       f) config_file=${OPTARG}
-         shift
-         shift;;
-    \?)
-      echo "Invalid option: -${OPTARG}"
-      usage
-      quit 1
-      ;;
+         ;;
+      s) secrets_ext=${OPTARG}
+         ;;
+      *) echo "Invalid option: -${OPTARG}"
+         usage
+         quit 1
+         ;;
   esac
 done
 
@@ -43,6 +45,20 @@ if [ ! -f "${config_file}" ];
 then
     echo "Config file ${config_file} not found"
     quit 1
+else
+    shift
+    shift
+fi
+
+if [ -n "${secrets_ext}" ]; then
+    shift
+    shift
+    ext="$secrets_ext"
+    for f in $(find . -name "*$ext" 2>/dev/null); do
+        outfile=${f%$ext}
+        sops -d "$f" > "$outfile"
+        echo $outfile >> $tmp
+    done
 fi
 
 for f in $(find . -name '*.tf.tpl'); do
