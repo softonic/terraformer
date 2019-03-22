@@ -1,7 +1,7 @@
 #!/bin/bash -e
 
-function quit() {
-    exit_code=$1
+function exit_handler() {
+    exit_code=$?
     cleanup
     exit $exit_code
 }
@@ -21,11 +21,12 @@ function cleanup() {
 }
 
 tmp=$(mktemp)
-trap "quit 1" SIGINT SIGTERM EXIT
+
+trap "exit_handler" SIGINT SIGTERM EXIT
 
 if [ $# -lt 3 ]; then
     usage
-    quit 1
+    exit 1
 fi
 
 while getopts "f:s:" opt; do
@@ -36,7 +37,7 @@ while getopts "f:s:" opt; do
          ;;
       *) echo "Invalid option: -${OPTARG}"
          usage
-         quit 1
+         exit 1
          ;;
   esac
 done
@@ -44,7 +45,7 @@ done
 if [ ! -f "${config_file}" ];
 then
     echo "Config file ${config_file} not found"
-    quit 1
+    exit 1
 else
     shift
     shift
@@ -69,4 +70,4 @@ done
 
 terraform "$@"
 
-quit 0
+exit 0
