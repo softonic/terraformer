@@ -1,6 +1,6 @@
 # Terraformer
 
-Use tamplating for terraform manifest.
+Use templating for terraform manifest.
 Templates use go template syntax and must have `.tf.tpl` extension.
 
 `-f` defines config file, it is mandatory.
