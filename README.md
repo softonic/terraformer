@@ -22,6 +22,10 @@ $ tree .
 └── variables.tf
 ```
 
+### Examples
+
+Use gcloud service account.
+
 ```bash
 $ cat sites.yaml
 site:
@@ -29,4 +33,15 @@ site:
 - bar
 
 docker run -v ~/.terraform:/root/.terraform -v ~/.terraform.d:/root/.terraform.d -v $(pwd):/app -w /app --rm -e GOOGLE_APPLICATION_CREDENTIALS=/app/service-account.json softonic/terraformer:edge -f sites.yaml -s .production.enc init
+```
+
+Use gcloud host credentials.
+
+```bash
+$ cat sites.yaml
+site:
+- foo
+- bar
+
+docker run -v ~/.config:/root/.config -v ~/.terraform:/root/.terraform -v ~/.terraform.d:/root/.terraform.d -v $(pwd):/app -w /app --rm softonic/terraformer:edge -f sites.yaml -s .production.enc init
 ```
