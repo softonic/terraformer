@@ -2,8 +2,6 @@
 
 function quit() {
     exit_code=$1
-    #msg=$2
-    # if message echo msg
     cleanup
     exit $exit_code
 }
@@ -47,16 +45,7 @@ then
     quit 1
 fi
 
-path=$1
-shift
-if [ ! -d $path ];
-then
-    echo "Target path ${path} not found"
-    quit 1
-fi
-
-
-for f in $(find "${path}" -name '*.tf.tpl'); do
+for f in $(find . -name '*.tf.tpl'); do
     outfile=${f/.tf.tpl/.tf};
     gomplate -d $config_file -f $f > $outfile;
     echo $outfile >> $tmp
