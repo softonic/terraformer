@@ -1,0 +1,67 @@
+#!/bin/bash -e
+
+function quit() {
+    exit_code=$1
+    #msg=$2
+    # if message echo msg
+    cleanup
+    exit $exit_code
+}
+
+function usage() {
+    echo "$0 -f <config_file> <path> <terraform_command>"
+    exit
+}
+
+function cleanup() {
+    for f in $(cat "${tmp}"); do
+        rm $f
+    done
+    rm "${tmp}"
+}
+
+tmp=$(mktemp)
+trap "quit 1" SIGINT SIGTERM
+
+if [ $# -lt 3 ]; then
+    usage
+    quit 1
+fi
+
+while getopts "f:" opt; do
+  case ${opt} in
+      f) config_file=${OPTARG}
+         shift
+         shift;;
+    \?)
+      echo "Invalid option: -${OPTARG}"
+      usage
+      quit 1
+      ;;
+  esac
+done
+
+if [ ! -f "${config_file}" ];
+then
+    echo "Config file ${config_file} not found"
+    quit 1
+fi
+
+path=$1
+shift
+if [ ! -d $path ];
+then
+    echo "Target path ${path} not found"
+    quit 1
+fi
+
+
+for f in $(find "${path}" -name '*.tf.tpl'); do
+    outfile=${f/.tf.tpl/.tf};
+    gomplate -d $config_file -f $f > $outfile;
+    echo $outfile >> $tmp
+done
+
+terraform "$@"
+
+quit 0
