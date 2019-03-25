@@ -29,11 +29,14 @@ if [ $# -lt 3 ]; then
     exit 1
 fi
 
-while getopts "f:s:" opt; do
+dry_run=0
+while getopts "f:s:d:" opt; do
   case ${opt} in
       f) config_file=${OPTARG}
          ;;
       s) secrets_ext=${OPTARG}
+         ;;
+      d) dry_run=1
          ;;
       *) echo "Invalid option: -${OPTARG}"
          usage
@@ -41,6 +44,11 @@ while getopts "f:s:" opt; do
          ;;
   esac
 done
+
+if [ $dry_run -eq 1 ];
+then
+    shift
+fi
 
 if [ ! -f "${config_file}" ];
 then
@@ -58,6 +66,11 @@ if [ -n "${secrets_ext}" ]; then
     for f in $(find . -name "*$ext" 2>/dev/null); do
         outfile=${f%$ext}
         sops -d "$f" > "$outfile"
+        if [ $dry_run -eq 1 ];
+        then
+           echo "# Decrypted secretfile: $outfile"
+           cat $outfile
+        fi
         echo $outfile >> $tmp
     done
 fi
@@ -65,9 +78,19 @@ fi
 for f in $(find . -name '*.tf.tpl'); do
     outfile=${f/.tf.tpl/.tf};
     gomplate -d $config_file -f $f > $outfile;
+    if [ $dry_run -eq 1 ];
+    then
+       echo "# File: $outfile"
+       cat $outfile
+    fi
     echo $outfile >> $tmp
 done
 
-terraform "$@"
+if [ $dry_run -eq 1 ];
+then
+    echo terraform "$@"
+else
+    terraform "$@"
+fi
 
 exit 0
