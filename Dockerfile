@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.11.14
+FROM hashicorp/terraform:0.12.19
 
 RUN apk add --upgrade --no-cache gomplate bash &&\
  wget https://github.com/mozilla/sops/releases/download/3.2.0/sops-3.2.0.linux &&\
