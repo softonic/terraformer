@@ -1,4 +1,4 @@
-FROM hashicorp/terraform:0.12.23
+FROM hashicorp/terraform:0.12.24
 
 ENV SOPS_VERSION=v3.5.0
 
