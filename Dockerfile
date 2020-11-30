@@ -1,6 +1,6 @@
-FROM hashicorp/terraform:0.12.24
+FROM hashicorp/terraform:0.12.29
 
-ENV SOPS_VERSION=v3.5.0
+ENV SOPS_VERSION=v3.6.1
 
 RUN apk add --upgrade --no-cache gomplate bash &&\
  wget https://github.com/mozilla/sops/releases/download/${SOPS_VERSION}/sops-${SOPS_VERSION}.linux &&\
